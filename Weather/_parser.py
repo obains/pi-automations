@@ -1,7 +1,80 @@
+import datetime
+import pandas as pd
+from pandas import json_normalize
+
+## General Parsers
 def parse_alerts(response_json):
-	if response_json["alerts"] is not None:
+	try:
 		alerts_title = response_json["alerts"]["event"]
 		alerts_desc = response_json["alerts"]["description"]
 		return alerts_title, alerts_desc
-	else:
+	except KeyError:
 		return None, None
+
+
+def parse_weather(response_json, time_period="hourly"):
+    tmp_list = response_json[time_period]
+    return tmp_list
+
+
+def dt_limiter(response_list, cut_off="eod"):
+    if cut_off == "eod":
+        time_limit = datetime.datetime.today().replace(hour=0, minute= 0, second=0, microsecond=0) + datetime.timedelta(1)
+
+    cleaned_list = []
+
+    for x in response_list:
+        if datetime.datetime.fromtimestamp(x["dt"]) < time_limit:
+            cleaned_list.append(x)
+    
+    return cleaned_list
+
+
+## Rain Parsers
+def will_it_rain_this_hour(minutely_list):
+    rain = False
+    for x in minutely_list:
+        if x["precipitation"] > 0:
+            rain = True
+    return rain
+
+
+def when_will_it_rain_this_hour(minutely_list):
+    df = json_normalize(minutely_list)
+    df["dt"] = pd.to_datetime(df["dt"], unit="s")
+    precipitation_breakdown = df.groupby(pd.cut(df["dt"], 6))[["precipitation"]].sum()
+    return precipitation_breakdown
+
+
+def when_will_it_rain_today(hourly_list):
+    def add_nested_dict(precipitation_dict, x, precipitation_amount, main_weather, description):
+        precipitation_dict[str(x)] = {}
+        precipitation_dict[str(x)]["precipitation"] = precipitation_amount
+        precipitation_dict[str(x)]["main_weather"] = main_weather
+        precipitation_dict[str(x)]["description"] = description
+    
+    precipitation_dict = {}
+
+    for x in hourly_list:
+        main_weather = x["weather"][0]["main"]
+        description = x["weather"][0]["description"]
+        if (main_weather == "Rain")| (main_weather == "Drizzle") | (main_weather == "Thunderstorm"):
+            precipitation_amount = x["rain"]
+            add_nested_dict(precipitation_dict, x, precipitation_amount, main_weather, description)
+        elif main_weather == "Snow":
+            precipitation_amount = x["snow"]
+            add_nested_dict(precipitation_dict, x, precipitation_amount, main_weather, description)
+
+    return precipitation_dict
+
+
+if __name__ == '__main__':
+    import _weather_controller
+    response_json = _weather_controller.get_forecast_weather(exclude_list=["current","daily"])
+    minutely_list = parse_weather(response_json, time_period="minutely")
+    #print(hourly_json)
+    #x = when_will_it_rain_today(hourly_json)
+    #print(hourly_json)
+    #x = dt_limiter(hourly_list)
+    print(minutely_list)
+    when_will_it_rain_this_hour(minutely_list)

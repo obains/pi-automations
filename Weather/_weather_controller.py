@@ -56,8 +56,19 @@ def _send_request(url, method="GET"):
 	response_json = json.loads(response.text)
 	return response_json
 
+## Testing
+
+def parse_alerts(response_json):
+	try:
+		alerts_title = response_json["alerts"]["event"]
+		alerts_desc = response_json["alerts"]["description"]
+		return alerts_title, alerts_desc
+	except KeyError:
+		return None, None
+
 
 if __name__ == "__main__":
-	get_current_weather_by_plz()
-	x,y = convert_lat_lon(plz, country_code)
-	get_forecast_weather(exclude_list=["daily","minutely"])
+	
+	response_json = get_forecast_weather(exclude_list=["current","daily"])
+	x, y = parse_alerts(response_json)
+	
