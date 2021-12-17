@@ -42,24 +42,30 @@ def will_it_rain_this_hour(minutely_list):
 def when_will_it_rain_this_hour(minutely_list):
     df = json_normalize(minutely_list)
     df["dt"] = pd.to_datetime(df["dt"], unit="s")
-    precipitation_breakdown = df.groupby(pd.cut(df["dt"], 6))[["precipitation"]].sum()
-    return precipitation_breakdown
+    time_list = ["10", "10-20", "20-30", "30-40", "40-50", "50-60"]
+    precipitation_breakdown = df.groupby(pd.cut(df["dt"], 6, labels=time_list))[["precipitation"]].sum()
+    precipitation_df = precipitation_breakdown[precipitation_breakdown["precipitation"] > 0]
+    
+    return precipitation_df
 
 
 def when_will_it_rain_today(hourly_list):
     def add_nested_dict(precipitation_dict, x, precipitation_amount, main_weather, description):
-        precipitation_dict[str(x)] = {}
-        precipitation_dict[str(x)]["precipitation"] = precipitation_amount
-        precipitation_dict[str(x)]["main_weather"] = main_weather
-        precipitation_dict[str(x)]["description"] = description
+        precipitation_dict[x["dt"]] = {
+            "precipitation": precipitation_amount,
+            "main_weather": main_weather,
+            "description": description
+            }
     
+    #hourly_list = dt_limiter(hourly_list)
+
     precipitation_dict = {}
 
     for x in hourly_list:
         main_weather = x["weather"][0]["main"]
         description = x["weather"][0]["description"]
         if (main_weather == "Rain")| (main_weather == "Drizzle") | (main_weather == "Thunderstorm"):
-            precipitation_amount = x["rain"]
+            precipitation_amount = x["rain"]["1h"]
             add_nested_dict(precipitation_dict, x, precipitation_amount, main_weather, description)
         elif main_weather == "Snow":
             precipitation_amount = x["snow"]
@@ -72,9 +78,9 @@ if __name__ == '__main__':
     import api
     response_json = api.get_forecast_weather(exclude_list=["current","daily"])
     minutely_list = parse_weather(response_json, time_period="minutely")
-    #print(hourly_json)
-    #x = when_will_it_rain_today(hourly_json)
-    #print(hourly_json)
-    #x = dt_limiter(hourly_list)
-    print(minutely_list)
-    when_will_it_rain_this_hour(minutely_list)
+    hourly_list = parse_weather(response_json, time_period="hourly")
+
+    #print(minutely_list)
+    #x = when_will_it_rain_this_hour(minutely_list)
+    x = when_will_it_rain_today(hourly_list)
+    print(x)
