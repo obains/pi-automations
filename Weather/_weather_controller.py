@@ -2,6 +2,7 @@
 
 import requests
 import env_var
+import json
 
 headers = {}
 payload = {}
@@ -11,62 +12,52 @@ country_code = "DE"
 token = env_var.token
 base_url_current = f"https://api.openweathermap.org/data/2.5/weather?appid={token}&units=metric"
 base_url_forecast = f"https://api.openweathermap.org/data/2.5/onecall?appid={token}&units=metric"
-base_url_geocode = f"http://api.openweatehermap.org/geo/1.0/zip?appid={token}"
+base_url_geocode = f"http://api.openweathermap.org/geo/1.0/zip?appid={token}"
 
 
 ## Functionality
 def get_current_weather_by_city():
 	url = base_url_current + f"&q={city},{country_code}"
-	response = _send_request(url)
-	print(response.text)
+	response_json = _send_request(url)
+	return response_json
 
 
 def get_current_weather_by_plz():
 	url = base_url_current + f"&zip={plz},{country_code}"
-	response = _send_request(url)
-	print(response.text)
+	response_json = _send_request(url)
+	return response_json
 
 
 def get_forecast_weather(exclude_list):
 	lat, lon = convert_lat_lon(plz, country_code)
 	exclude_list = ",".join(exclude_list)
 	url = base_url_forecast + f"&lat={str(lat)}&lon={str(lon)}&exclude={exclude_list}"
-	response = _send_request(url)
-	print(response.text)
+	response_json = _send_request(url)
+	return response_json
 
 
-
-## Workers
-def _send_request(url, method="GET"):
-	response = requests.request(method, url, data=payload, headers=headers)
-	return response
-
-
+## Coordinate Finder
 def convert_lat_lon(plz, country_code):
 	url = base_url_geocode + f"&zip={plz},{country_code}"
 	try:
-		response = _send_request(url)
-		response_json = json.loads(response.text)
-		lat = response.text["lat"]
-		lon = response.text["lon"]
-	except:
-		print("Fallback: using Berlin...")
+		response_json = _send_request(url)
+		lat = response_json["lat"]
+		lon = response_json["lon"]
+	except Exception as e:
 		lat = 52.5167
 		lon = 13.4
 
 	return lat, lon
 
 
-def parse_alerts(response_json):
-	if response_json["alerts"] is not None:
-		alerts_title = response_json["alerts"]["event"]
-		alerts_desc = response_json["alerts"]["description"]
-		return alerts_title, alerts_desc
-	else:
-		return None, None
+## Workers
+def _send_request(url, method="GET"):
+	response = requests.request(method, url, data=payload, headers=headers)
+	response_json = json.loads(response.text)
+	return response_json
 
 
 if __name__ == "__main__":
-	#get_current_weather_by_plz()
-	#convert_lat_long(plz, country_code)
+	get_current_weather_by_plz()
+	x,y = convert_lat_lon(plz, country_code)
 	get_forecast_weather(exclude_list=["daily","minutely"])
