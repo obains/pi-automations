@@ -69,8 +69,8 @@ def when_will_it_rain_today(hourly_list):
 
 
 if __name__ == '__main__':
-    import _weather_controller
-    response_json = _weather_controller.get_forecast_weather(exclude_list=["current","daily"])
+    import api
+    response_json = api.get_forecast_weather(exclude_list=["current","daily"])
     minutely_list = parse_weather(response_json, time_period="minutely")
     #print(hourly_json)
     #x = when_will_it_rain_today(hourly_json)
