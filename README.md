@@ -1,4 +1,4 @@
 ## TODO
 
-* Create notification logic
+* Create notification push and logic 
 * Support incoming commands via hook
