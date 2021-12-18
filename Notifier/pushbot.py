@@ -2,7 +2,7 @@
 
 import datetime
 import requests
-from env_var import token
+from Notifier.env_var import token
 
 base_url = "https://api.pushbullet.com/v2/"
 headers = { 

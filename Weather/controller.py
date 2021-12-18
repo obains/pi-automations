@@ -1,8 +1,8 @@
 import datetime
 
-import api
-import communication
-import parser
+import Weather.api as api
+import Weather.communication as communication
+import Weather.parser as parser
 
 def get_data():
     response_json = api.get_forecast_weather(exclude_list=["current","daily"])

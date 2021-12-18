@@ -1,7 +1,7 @@
 # encoding=utf-8
 
 import requests
-import env_var
+import Weather.env_var as env_var
 import json
 
 headers = {}
