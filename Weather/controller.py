@@ -18,10 +18,10 @@ def rain_hourly(response_json):
         for i in range(len(precipitation_breakdown)):
             message.append(f"In the next {precipitation_breakdown.index[i]} minutes ({str(precipitation_breakdown['precipitation'][i])}mm).")
 
-        return communication.communication_dict["title"]["rain_this_hour"], "\n".join(message)
+        return {communication.communication_dict["title"]["rain_this_hour"], "\n".join(message)}
     
     else:
-        return None, None
+        return {None, None}
 
     
 
@@ -36,13 +36,35 @@ def rain_daily(response_json):
             rain_message = f"{precipitation_dict[i]['description']} ({str(precipitation_dict[i]['precipitation'])}mm)"
             message.append(f"At {rain_time} there will be {rain_message}.")
 
-        return communication.communication_dict["title"]["rain_today"], "\n".join(message)
+        return {communication.communication_dict["title"]["rain_today"], "\n".join(message)}
     
     else:
-        return None, None
+        return {None, None}
+
+
+## Controllers
+def controller_rain():
+    response_json = get_data()
+    rain_hourly_dict = rain_hourly(response_json)
+    rain_daily_dict = rain_daily(response_json)
+
+    (rain_title, rain_message) = (None, None)
+
+    if len(rain_hourly_dict) > 0:
+        rain_title = list(rain_hourly_dict.keys())[0]
+        rain_message = list(rain_hourly_dict.values())[0]
+
+    if len(rain_daily_dict) > 0:
+        if rain_title is not None:
+            communication.communication_dict["title"]["rain_this_hour_and_today"]
+            rain_message = rain_message + "\n" + list(rain_daily_dict.values())[0]
+        else:
+            rain_title = list(rain_daily_dict.keys())[0]
+            rain_message = list(rain_daily_dict.values())[0]
+    return rain_title, rain_message
 
 
 if __name__ == '__main__':
     response_json = get_data()
-    title_rain_hourly, message_rain_hourly = rain_hourly(response_json)
-    title_rain_daily, message_rain_daily = rain_daily(response_json)
+    rain_hourly_dict = rain_hourly(response_json)
+    rain_daily_dict = rain_daily(response_json)

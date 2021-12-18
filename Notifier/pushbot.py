@@ -23,13 +23,13 @@ def get_current_devices():
 	print(response.text)
 
 
-def create_push():
+def create_push(body, title):
 	url = base_url + "pushes"
 	create_push_payload = {
 		"active": True,
-		"body": "test",
+		"body": body,
 		"created": datetime.datetime.now().strftime(format="%Y-%m-%d %H:%M:%s"),
-		"title": "Title",
+		"title": title,
 		"type": "note"
 	}
 	response = _send_request(url, payload=create_push_payload, method="POST")
