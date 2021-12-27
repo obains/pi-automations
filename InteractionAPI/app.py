@@ -1,17 +1,31 @@
-from flask import Flask, json
+from flask import Flask, json, request
+import subprocess
+import threading 
 
 app = Flask(__name__)
 
 
 @app.route('/run_script', methods=['POST'])
 def run_script():
+	def start():
+		subprocess.run(f"cd /home/pi/pi-automations/ && python3 -c 'import notification_engine; {name}()'")
+
 	try:
 		script_name = request.args.get('name')
 		errors = False
-		return errors, script_name
 	except Exception as e:
 		errors = True
-		return errors, e
+
+	if errors is not True:
+		try:
+			thread = threading.Thread(target=start)
+			thread.start()
+			return "success"
+		except Exception as e:
+			return e
+	else:
+		return e
+
 
 
 @app.route('/', methods=['GET'])
