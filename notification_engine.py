@@ -4,6 +4,7 @@ import Weather.controller as weather
 import Notifier.pushbot as notifier
 import notification_times
 
+
 def controller_rain():
 	body, title = weather.controller_rain()
 	if (body, title) != (None, None):

@@ -4,16 +4,17 @@ import subprocess
 import threading 
 
 app = Flask(__name__)
+#working_dir = "/home/ollie/Documents/pi-automations"
+working_dir = "/home/pi/pi-automations"
 
 
 @app.route('/run_script', methods=['POST'])
 def run_script():
 	def start(name):
-		print(os.getcwd())
-		working_dir = "/home/ollie/Documents/pi-automations/"
-		#working_dir = "/home/pi/pi-automations/"
-		command_to_trigger = f"cd {working_dir} && python3 -c 'from notification_engine import {name}; {name}()'"
-		subprocess.run(str(command_to_trigger))
+		os.chdir(working_dir)
+		command_to_trigger = f"python3 -c 'from notification_engine import {name}; {name}()'"
+
+		subprocess.Popen(str(command_to_trigger), shell=True)
 
 	try:
 		script_name = request.args.get('name')
