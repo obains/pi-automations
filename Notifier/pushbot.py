@@ -23,7 +23,7 @@ def get_current_devices():
 	print(response.text)
 
 
-def create_push(body, title):
+def create_push(title, body):
 	url = base_url + "pushes"
 	create_push_payload = {
 		"active": True,

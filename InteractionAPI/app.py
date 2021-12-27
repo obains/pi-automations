@@ -1,4 +1,5 @@
 from flask import Flask, json, request
+import os
 import subprocess
 import threading 
 
@@ -8,8 +9,11 @@ app = Flask(__name__)
 @app.route('/run_script', methods=['POST'])
 def run_script():
 	def start(name):
-		command_to_triger = f"cd /home/pi/pi-automations/ && python3 -c 'import notification_engine; {name}()'"
-		subprocess.run(command_to_trigger)
+		print(os.getcwd())
+		working_dir = "/home/ollie/Documents/pi-automations/"
+		#working_dir = "/home/pi/pi-automations/"
+		command_to_trigger = f"cd {working_dir} && python3 -c 'from notification_engine import {name}; {name}()'"
+		subprocess.run(str(command_to_trigger))
 
 	try:
 		script_name = request.args.get('name')
