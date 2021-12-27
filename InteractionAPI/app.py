@@ -7,8 +7,9 @@ app = Flask(__name__)
 
 @app.route('/run_script', methods=['POST'])
 def run_script():
-	def start():
-		subprocess.run(f"cd /home/pi/pi-automations/ && python3 -c 'import notification_engine; {name}()'")
+	def start(name):
+		command_to_triger = f"cd /home/pi/pi-automations/ && python3 -c 'import notification_engine; {name}()'"
+		subprocess.run(command_to_trigger)
 
 	try:
 		script_name = request.args.get('name')
@@ -18,7 +19,7 @@ def run_script():
 
 	if errors is not True:
 		try:
-			thread = threading.Thread(target=start)
+			thread = threading.Thread(target=start, args=(script_name,))
 			thread.start()
 			return "success"
 		except Exception as e:
