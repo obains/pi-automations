@@ -57,7 +57,7 @@ def when_will_it_rain_today(hourly_list):
             "description": description
             }
     
-    #hourly_list = dt_limiter(hourly_list)
+    hourly_list = dt_limiter(hourly_list)
 
     precipitation_dict = {}
 
