@@ -19,7 +19,7 @@ def parse_weather(response_json, time_period="hourly"):
 
 def dt_limiter(response_list, cut_off="eod"):
     if cut_off == "eod":
-        time_limit = datetime.datetime.today().replace(hour=0, minute= 0, second=0, microsecond=0) + datetime.timedelta(1)
+        time_limit = datetime.datetime.today().replace(hour=2, minute= 0, second=0, microsecond=0) + datetime.timedelta(1)
 
     cleaned_list = []
 
